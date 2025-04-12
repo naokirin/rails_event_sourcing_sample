@@ -18,13 +18,12 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
 
       - name: Install dependencies
         run: |
-          gem install rubycritic churn-rb slack-notifier
+          gem install rubycritic churn slack-notifier
         
       - name: Run metrics
-        run: ruby .github/scripts/run_metrics.rb
+        run: ruby .github/scripts/send_metrics_to_slack.rb
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
