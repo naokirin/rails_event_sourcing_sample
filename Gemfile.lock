@@ -103,6 +103,11 @@ GEM
     erubi (1.12.0)
     globalid (1.1.0)
       activesupport (>= 5.0)
+    graphwerk (1.2.1)
+      activesupport
+      packwerk
+      ruby-graphviz
+      sorbet-runtime
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     importmap-rails (1.1.5)
@@ -202,6 +207,8 @@ GEM
     reline (0.3.2)
       io-console (~> 0.5)
     rexml (3.2.5)
+    ruby-graphviz (1.2.5)
+      rexml
     ruby_event_store (2.9.1)
       concurrent-ruby (~> 1.0, >= 1.1.6)
     ruby_event_store-active_record (2.9.1)
@@ -260,6 +267,7 @@ DEPENDENCIES
   bootsnap
   capybara
   debug
+  graphwerk
   importmap-rails
   jbuilder
   packwerk

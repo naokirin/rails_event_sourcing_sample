@@ -29,6 +29,7 @@ gem "jbuilder"
 
 # For Event Sourcing
 gem "rails_event_store"
+gem 'graphwerk', group: %i[development test]
 
 # For Modular Monolith, makes a project into small packages
 gem "packwerk"
