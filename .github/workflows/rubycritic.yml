@@ -1,0 +1,37 @@
+name: Code Metrics Report
+
+on:
+  # 平日午前9時(JST)に実行する場合
+  # schedule:
+  #   - cron: '0 0 * * 1,2,3,4,5'
+  workflow_dispatch: # 手動実行用
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 全履歴を取得（比較のため）
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          gem install rubycritic
+          gem install slack-notifier
+
+      - name: Run RubyCritic and send to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          # RubyCriticを実行してレポートを生成
+          mkdir -p tmp/rubycritic
+          rubycritic --format json app lib
+
+          # Rubyスクリプトを使ってSlackに通知
+          ruby .github/scripts/send_metrics_to_slack.rb
