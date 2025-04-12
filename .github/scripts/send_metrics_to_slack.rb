@@ -10,6 +10,11 @@ require 'churn/calculator'
 require 'json'
 require 'slack-notifier'
 
+def score(analyser_name)
+  smell_count = analysed_modules.map { |m| m.smells.select { |smell| smell.analyser == analyser_name }.size }.compact.sum
+  smell_count * 1.0 / analysed_modules.count rescue 0
+end
+
 # Slack通知用のWebhook URL
 slack_webhook_url = ENV['SLACK_WEBHOOK_URL']
 notifier = Slack::Notifier.new(slack_webhook_url)
@@ -46,8 +51,8 @@ ANALYSERS.each do |analyser_class|
 end
 
 # RubyCriticからのデータ集計
-flog_score = analysed_modules.map(&:flog_score).compact.sum / analysed_modules.count rescue 0
-flay_score = analysed_modules.map(&:flay_score).compact.sum / analysed_modules.count rescue 0
+flog_score = score('flog')
+flay_score = score('flay')
 complexity = analysed_modules.map(&:complexity).compact.sum / analysed_modules.count rescue 0
 smells_count = analysed_modules.map { |m| m.smells.count }.sum
 
@@ -85,8 +90,8 @@ message = <<~MESSAGE
   :chart_with_upwards_trend: *コードメトリクスレポート (#{today})* :chart_with_upwards_trend:
 
   *基本メトリクス:*
-  • 平均Flogスコア: #{results[:metrics][:average_flog_score]}
-  • 平均Flayスコア: #{results[:metrics][:average_flay_score]}
+  • 平均Flogカウント: #{results[:metrics][:average_flog_score]}
+  • 平均Flayカウント: #{results[:metrics][:average_flay_score]}
   • 平均複雑度: #{results[:metrics][:average_complexity]}
   • コードスメル数: #{results[:metrics][:total_code_smells]}
 
