@@ -22,16 +22,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          gem install rubycritic
-          gem install slack-notifier
-
-      - name: Run RubyCritic and send to Slack
+          gem install rubycritic churn-rb slack-notifier
+        
+      - name: Run metrics
+        run: ruby .github/scripts/run_metrics.rb
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          # RubyCriticを実行してレポートを生成
-          mkdir -p tmp/rubycritic
-          rubycritic --format json app lib
-
-          # Rubyスクリプトを使ってSlackに通知
-          ruby .github/scripts/send_metrics_to_slack.rb
