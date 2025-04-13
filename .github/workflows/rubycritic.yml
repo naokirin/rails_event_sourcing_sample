@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          gem install rubycritic churn slack-notifier
+          gem install rubycritic churn slack-notifier activesupport git
         
       - name: Run metrics
         run: ruby .github/scripts/send_metrics_to_slack.rb
