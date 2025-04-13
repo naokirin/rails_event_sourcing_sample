@@ -79,21 +79,22 @@ def metrics(git, target_paths, date_string)
   puts "Running Churn analysis..."
   churn = Churn::ChurnCalculator.new({
     minimum_churn_count: 3,
-    start_date: (Date.today - 30).to_s
+    start_date: '1 month ago',
+    file_extension: %w[rb]
   })
   churn_result = churn.report(false)
 
   # Churnデータを集計
-  churn_classes = churn_result[:churn][:classes] || []
-  churn_methods = churn_result[:churn][:methods] || []
+  churn_classes = churn_result[:churn][:class_churn] || []
+  churn_methods = churn_result[:churn][:method_churn] || []
 
-  top_churned_files = churn_classes.sort_by { |file| -file[:times_changed] }.first(5)
-  top_churned_methods = churn_methods.sort_by { |method| -method[:times_changed] }.first(5)
+  top_churned_classes = churn_classes.sort_by { |c| -c['times_changed'] }.first(5)
+  top_churned_methods = churn_methods.sort_by { |method| -method['times_changed'] }.first(5)
 
   result[:metrics][:churn] = {
-    average_class_churn: (churn_classes.empty? ? 0 : churn_classes.map { |c| c[:times_changed] }.sum / churn_classes.size.to_f).round(2),
-    top_churned_files: top_churned_files.map { |f| "#{f[:file_path]} (#{f[:times_changed]}回変更)" },
-    top_churned_methods: top_churned_methods.map { |m| "#{m[:method_name]} in #{m[:file_path]} (#{m[:times_changed]}回変更)" }
+    average_class_churn: (churn_classes.empty? ? 0 : churn_classes.map { |c| c['times_changed'] }.sum / churn_classes.size.to_f).round(2),
+    top_churned_classes: top_churned_classes.map { |c| "#{c['klass']['klass']} in #{c['klass']['file']} (#{c['times_changed']}回変更)" },
+    top_churned_methods: top_churned_methods.map { |m| "#{m['method']['method']} in #{m['method']['file']} (#{m['times_changed']}回変更)" }
   }
 
   result
@@ -122,19 +123,19 @@ message = <<~MESSAGE
   *Churn (コード変更頻度):*
   • 平均クラス変更頻度: #{result_today[:metrics][:churn][:average_class_churn]}（前週：#{result_last_week[:metrics][:churn][:average_class_churn]}）
   
-  *最も変更の多いファイル:*
-    今週
-    #{result_today[:metrics][:churn][:top_churned_files].map { |f| "• #{f}" }.join("\n")}
+  *最も変更の多いクラス:*
+  今週
+  #{result_today[:metrics][:churn][:top_churned_classes].map { |f| "• #{f}" }.join("\n")}
   
-    前週
-    #{result_last_week[:metrics][:churn][:top_churned_files].map { |f| "• #{f}" }.join("\n")}
+  前週
+  #{result_last_week[:metrics][:churn][:top_churned_classes].map { |f| "• #{f}" }.join("\n")}
   
   *最も変更の多いメソッド:*
-    今週
-    #{result_today[:metrics][:churn][:top_churned_methods].map { |m| "• #{m}" }.join("\n")}
+  今週
+  #{result_today[:metrics][:churn][:top_churned_methods].map { |m| "• #{m}" }.join("\n")}
   
-    前週
-    #{result_last_week[:metrics][:churn][:top_churned_methods].map { |m| "• #{m}" }.join("\n")}
+  前週
+  #{result_last_week[:metrics][:churn][:top_churned_methods].map { |m| "• #{m}" }.join("\n")}
 MESSAGE
 
 # Slackに通知
